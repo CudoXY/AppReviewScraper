@@ -13,7 +13,7 @@ python play_scrape.py --pages 3 --id edu.mobapde.wake --output reviews.csv
 
 ### Parameters:
 - \-\-pages - the number of pages to scrape (40 per page)
-- \-\-id - the app ID from the Google Play Store (ex. https://play.google.com/store/apps/details?id=**edu.mobapde.wake**)
+- \-\-id - the app ID from the Google Play Store (ex. https/\/play.google.com/store/apps/details?id=**edu.mobapde.wake**)
 - \-\-output - the file path where the CSV will be saved
 
 ---
