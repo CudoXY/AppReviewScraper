@@ -1,11 +1,3 @@
-try:
-    from pip import main as pipmain
-except ImportError:
-    from pip._internal import main as pipmain
-
-pipmain(['install', 'requests'])
-pipmain(['install', 'pandas'])
-
 import os
 from optparse import OptionParser
 import appstore_scrape
@@ -56,6 +48,11 @@ def main():
                       action="store",
                       dest="ios_app_id",
                       help="The App Store App ID of the app you want to scrape reviews")
+    parser.add_option("-c", "--country",
+                      action="store",
+                      dest="country",
+                      default="ph",
+                      help="The country code where the reviews will be scraped (only for iOS)", )
 
     (options, args) = parser.parse_args()
 
@@ -69,7 +66,7 @@ def main():
     if options.ios_app_id is not None and options.ios_app_id:
         print("[*] Starting scraping for iOS (%s)", options.ios_app_id)
         save_path = append_platform_to_filename(options.output, PLATFORM_IOS_FILENAME_SUFFIX)
-        appstore_scrape.save_page_reviews(options.ios_app_id, options.pages, save_path)
+        appstore_scrape.save_page_reviews(options.ios_app_id, options.country, options.pages, save_path)
         print("[*] Finished scraping to file " + save_path)
         print()
 
