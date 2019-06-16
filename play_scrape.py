@@ -1,4 +1,4 @@
-# Originally from https://github.com/RiccardoAncarani/play-scrape
+# Forked from https://github.com/RiccardoAncarani/play-scrape
 
 try:
     from pip import main as pipmain
@@ -22,6 +22,8 @@ COLUMN_AUTHOR = 'author'
 COLUMN_REVIEW_DATE = 'review_date'
 COLUMN_RATING = 'rating'
 COLUMN_CONTENT = 'content'
+
+URL_GOOGLEPLAY_REVIEWS = "https://play.google.com/store/getreviews?authuser=0"
 
 
 def create_df():
@@ -50,44 +52,58 @@ def get_google_play_reviews(play_store_id, page_index):
         The Pandas DataFrame object of the scraped values
     """
 
-    def parse_author_name(str):
+    def parse_author_name(response):
         """
-        Parses the author name from the scraped HTML element.
+        Parses the author name from the POST request from Google Play
 
-        :param str:
-            The HTML element to be parsed
+        :param response:
+            The response from the POST request from Google Play
 
         :return:
-            The parsed author name
+            The parsed list of author name
         """
 
-        return str[9:][:-44]
+        return [author[9:][:-44] for author in re.findall("author-name(.*?)review-date", response.text)]
 
-    def parse_review_date(str):
+    def parse_rating(response):
         """
-        Parses the review date from the scraped HTML element.
+        Parses the ratings from the POST request from Google Play
 
-        :param str:
-            The HTML element to be parsed
+        :param response:
+            The response from the POST request from Google Play
 
         :return:
-            The parsed review date
+            The parsed list of ratings
         """
 
-        return str[8:][:-39]
+        return [int(rating) for rating in re.findall("Rated (.*?) stars out of five stars", response.text)]
 
-    def parse_review_content(str):
+    def parse_review_date(response):
         """
-        Parses the review content from the scraped HTML element.
+        Parses the review date from the POST request from Google Play
 
-        :param str:
-            The HTML element to be parsed
+        :param response:
+            The response from the POST request from Google Play
 
         :return:
-            The parsed review content
+            The parsed list of review date
         """
 
-        return str[26:][:-24].encode('ascii', 'ignore').decode('ascii').replace('\\\"', '\"')
+        return [review_date[8:][:-39] for review_date in re.findall("review-date(.*?)reviews-permalink", response.text)]
+
+    def parse_review_content(response):
+        """
+        Parses the review content from the POST request from Google Play
+
+        :param response:
+            The response from the POST request from Google Play
+
+        :return:
+            The parsed list of review content
+        """
+
+        return [review_content[26:][:-24].encode('ascii', 'ignore').decode('ascii').replace('\\\"', '\"')
+                for review_content in re.findall("review-title(.*?)review-link", response.text)]
 
     # Creates a POST request to be scraped
     data = {
@@ -98,15 +114,13 @@ def get_google_play_reviews(play_store_id, page_index):
         "xhr": 1,
         "hl": "en"
     }
-    r = requests.post("https://play.google.com/store/getreviews?authuser=0", data=data)
+    r = requests.post(URL_GOOGLEPLAY_REVIEWS, data=data)
 
     # Parse the data
-    author_list = [parse_author_name(author) for author in re.findall("author-name(.*?)review-date", r.text)]
-    review_date_list = [parse_review_date(review_date) for review_date in
-                        re.findall("review-date(.*?)reviews-permalink", r.text)]
-    stars_list = re.findall("Rated (.*?) stars out of five stars", r.text)
-    review_content_list = [parse_review_content(review_content) for review_content in
-                           re.findall("review-title(.*?)review-link", r.text)]
+    author_list = parse_author_name(r)
+    review_date_list = parse_review_date(r)
+    stars_list = parse_rating(r)
+    review_content_list = parse_review_content(r)
 
     # Format the data into a table
     df = create_df()
