@@ -1,5 +1,3 @@
-# Forked from https://github.com/RiccardoAncarani/play-scrape
-
 try:
     from pip import main as pipmain
 except ImportError:
@@ -116,18 +114,13 @@ def get_google_play_reviews(play_store_id, page_index):
     }
     r = requests.post(URL_GOOGLEPLAY_REVIEWS, data=data)
 
-    # Parse the data
-    author_list = parse_author_name(r)
-    review_date_list = parse_review_date(r)
-    stars_list = parse_rating(r)
-    review_content_list = parse_review_content(r)
-
     # Format the data into a table
     df = create_df()
-    df[COLUMN_AUTHOR] = author_list
-    df[COLUMN_REVIEW_DATE] = review_date_list
-    df[COLUMN_RATING] = stars_list
-    df[COLUMN_CONTENT] = review_content_list
+    df[COLUMN_AUTHOR] = parse_author_name(r)
+    df[COLUMN_REVIEW_DATE] = parse_review_date(r)
+    df[COLUMN_REVIEW_DATE] = pd.to_datetime(df[COLUMN_REVIEW_DATE])
+    df[COLUMN_RATING] = parse_rating(r)
+    df[COLUMN_CONTENT] = parse_review_content(r)
 
     print("[*] Retrieved " + str(len(df)) + " reviews")
 
