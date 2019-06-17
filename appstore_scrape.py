@@ -1,13 +1,17 @@
 # Originally from https://gist.github.com/kgn/e96e7ae71a38447ac614
 
-try:
-    from pip import main as pipmain
-except ImportError:
-    from pip._internal import main as pipmain
+# Install packages from script
+import subprocess
+import sys
 
-pipmain(['install', 'requests'])
-pipmain(['install', 'pandas'])
-pipmain(['install', 'feedparser'])
+def install(package):
+    subprocess.call([sys.executable, "-m", "pip", "install", package])
+
+install('requests')
+install('pandas')
+install('feedparser')
+
+# -----------------------------
 
 from optparse import OptionParser
 from pathlib import Path

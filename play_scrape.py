@@ -1,10 +1,14 @@
-try:
-    from pip import main as pipmain
-except ImportError:
-    from pip._internal import main as pipmain
+# Install packages from script
+import subprocess
+import sys
 
-pipmain(['install', 'requests'])
-pipmain(['install', 'pandas'])
+def install(package):
+    subprocess.call([sys.executable, "-m", "pip", "install", package])
+
+install('requests')
+install('pandas')
+
+# -----------------------------
 
 import requests
 import re
